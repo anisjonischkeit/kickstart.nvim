@@ -81,6 +81,38 @@ return {
       -- others
       ['<C-S-d>'] = 'actions.preview_scroll_down',
       ['<C-S-u>'] = 'actions.preview_scroll_up',
+      ['f'] = {
+        desc = 'Find in current directory',
+        callback = function(state)
+          local function get_git_root()
+            local dot_git_path = vim.fn.finddir('.git', '.;')
+            return vim.fn.fnamemodify(dot_git_path, ':h')
+          end
+
+          local oil = require 'oil'
+          local entry = oil.get_cursor_entry()
+          local type = entry.type
+          local path = entry.name
+
+          print(entry)
+          if type == 'file' then
+            path = entry._parent_id
+          end
+
+          local root_path = oil.get_current_dir() .. path
+
+          --           print(oil.get_current_dir())
+          --           print(root_path)
+          --           local i1, i2 = path:find(root_path:gsub('%/[^%/]*$', ''), nil, true)
+          --           local relative_root = path:sub(i2 + 1)
+
+          require('telescope.builtin').live_grep {
+            hidden = true,
+            cwd = path,
+            results_title = root_path,
+          }
+        end,
+      },
     },
     -- Configuration for the floating keymaps help window
     keymaps_help = {
